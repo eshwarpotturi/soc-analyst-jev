@@ -13,6 +13,10 @@ import httpx
 
 from attacker import MAX_ATTACKERS, generate_attackers
 from state_builder import build_state
+from tls_trust import enable_os_trust
+
+# Trust the OS cert store (corporate TLS-inspecting proxies); no-op otherwise.
+enable_os_trust()
 
 CORPUS_PATH = Path(__file__).parent / "fixtures" / "corpus.jsonl"
 USD_PER_M_INPUT_TOKENS = 0.042

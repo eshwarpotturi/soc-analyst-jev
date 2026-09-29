@@ -18,6 +18,11 @@ from fastapi.responses import JSONResponse
 from jev_client import JevUnavailable, classify
 from policy import decide
 from state_builder import build_state
+from tls_trust import enable_os_trust
+
+# The Jev HTTPS call happens in THIS process. Trust the OS cert store so a
+# corporate TLS-inspecting proxy doesn't cause CERTIFICATE_VERIFY_FAILED.
+enable_os_trust()
 
 DEFAULT_TARGET = "http://127.0.0.1:8000"
 DEFAULT_LOG_PATH = "logs/proxy.jsonl"
