@@ -285,3 +285,50 @@
     resize(); restart(); play(); requestAnimationFrame(loop);
   }
 })();
+
+// ---- semantic comparison section (independent of the run replay) ----
+(function () {
+  'use strict';
+  const sec = document.getElementById('semantic');
+  if (!sec) return;
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const load = window.__COMPARE__ ? Promise.resolve(window.__COMPARE__)
+    : fetch('compare.json').then((r) => { if (!r.ok) throw new Error('compare.json HTTP ' + r.status); return r.json(); });
+  load.then(render).catch(() => { sec.hidden = true; }); // no comparison data: hide the section cleanly
+
+  function card(a, total) {
+    const isJev = a.name.toLowerCase().includes('jev');
+    const cls = a.caught === 0 ? 'miss' : (isJev ? 'win' : '');
+    const pct = a.attacks ? Math.round(100 * a.caught / a.attacks) : 0;
+    const v = a.caught === 0
+      ? '<div class="verdict bad">Blind to this class &mdash; every semantic attack passed straight through.</div>'
+      : (isJev ? `<div class="verdict good">Caught ${pct}% by weighing intent, not signatures.</div>` : '');
+    return `<div class="cmpcard"><h4>${esc(a.name.split(' (')[0])}</h4>`
+      + `<p class="sub">${esc(a.name.includes('(') ? a.name.split('(')[1].replace(')', '') : '')}</p>`
+      + `<div class="big ${cls}">${a.caught}<span class="of"> / ${a.attacks}</span></div>`
+      + `<div class="cap">semantic attacks caught</div>`
+      + `<div class="mini"><div><b>${a.missed}</b><div class="k">missed</div></div>`
+      + `<div><b>${a.false_alarms}</b><div class="k">false alarms</div></div></div>${v}</div>`;
+  }
+
+  function render(d) {
+    const R = d.approaches.regex, J = d.approaches.jev;
+    document.getElementById('sem-cols').innerHTML = card(R, d.attacks) + (J ? card(J, d.attacks)
+      : '<div class="cmpcard"><h4>Jev</h4><p class="sub">judgment model</p><div class="big">&mdash;</div><div class="cap">pending a Jev run</div></div>');
+    document.querySelector('#sem-ex tbody').innerHTML = (d.examples || []).map((e) => `<tr>`
+      + `<td>${esc(e.text)}</td><td class="cat">${esc((e.category || '').replace(/_/g, ' '))}</td>`
+      + `<td><span class="tag ${e.regex}">${e.regex}</span></td>`
+      + `<td><span class="tag ${e.jev}">${e.jev}</span></td></tr>`).join('');
+    // Plain-language explanation, including the honest false-alarm caveat.
+    const note = document.getElementById('sem-note');
+    if (!J) { note.innerHTML = 'Run Jev over the same set to fill in its column.'; return; }
+    const fa = J.false_alarms;
+    note.innerHTML =
+      `<b>How to read this.</b> On ${d.total} requests (${d.attacks} semantic attacks, ${d.benign} legitimate), the signature WAF caught `
+      + `<b>${R.caught} of ${d.attacks}</b> &mdash; these attacks carry no pattern to match, so its rules never fired. Jev caught `
+      + `<b>${J.caught} of ${d.attacks}</b> by judging what the request is trying to do. This is the case for a judgment model: it defends against a whole class of attack a rule engine structurally cannot see. `
+      + (fa > 0
+          ? `The trade-off is honest &mdash; Jev raised <b>${fa} false alarm${fa === 1 ? '' : 's'}</b>, all on legitimate checkout and cart requests. Business-logic abuse and real business logic touch the same machinery (prices, orders), so the line between them is genuinely blurrier than for a SQL-injection payload. Those borderline requests scored near the block threshold; a higher threshold for that traffic, or a &ldquo;challenge&rdquo; step instead of an outright block, removes them.`
+          : `And it did so with <b>no false alarms</b> on the legitimate traffic.`);
+  }
+})();

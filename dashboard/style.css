@@ -65,3 +65,32 @@ h2 small{text-transform:none;letter-spacing:0;margin-left:6px;opacity:.7}
 @media(max-width:800px){main{grid-template-columns:1fr}.counter{margin-left:0}.scroll{height:260px}}
 @media(max-width:520px){h1 span{display:block;margin-left:0}.legend{max-width:calc(100% - 32px);bottom:52px}.chip{min-width:56px;padding:4px 8px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* semantic comparison section */
+#semantic{border-top:1px solid var(--line);background:#0a0e13}
+.sem-inner{max-width:1000px;margin:0 auto;padding:26px 16px 40px}
+.sem-h{font-family:var(--display);color:var(--gold);font-size:22px;margin:0 0 8px;text-transform:none;letter-spacing:.02em}
+.sem-lede{color:var(--dim);max-width:74ch;margin:0 0 18px}.sem-lede b{color:var(--text)}
+#semantic .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+#semantic .cmpcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+#semantic .cmpcard h4{font-family:var(--display);font-size:17px;margin:0 0 2px;text-transform:none;letter-spacing:.02em;color:var(--text)}
+#semantic .cmpcard .sub{color:var(--dim);font-size:12.5px;margin:0 0 12px}
+#semantic .big{font-size:42px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+#semantic .big.miss{color:var(--red)}#semantic .big.win{color:var(--green)}
+#semantic .of{color:var(--dim);font-size:15px;font-weight:400}
+#semantic .cap{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+#semantic .mini{display:flex;gap:18px;margin-top:12px}.sem-inner .mini b{font-variant-numeric:tabular-nums}
+#semantic .mini .k{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+#semantic .verdict{margin-top:12px;font-size:13px;padding:8px 10px;border-radius:6px;border-left:3px solid}
+#semantic .verdict.bad{background:#2a1218;border-color:var(--red)}
+#semantic .verdict.good{background:#0e2018;border-color:var(--green)}
+.sem-sub{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:26px 0 8px}
+#sem-ex{width:100%;border-collapse:collapse;font-size:13px}
+#sem-ex th,#sem-ex td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+#sem-ex th{color:var(--dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+#sem-ex .cat{color:var(--accent);font-size:11px;white-space:nowrap}
+#sem-ex .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600}
+#sem-ex .tag.allowed{background:#2a1218;color:#ff8a95}#sem-ex .tag.blocked{background:#0e2018;color:#7ee2a8}
+.sem-note{margin-top:18px;font-size:13.5px;line-height:1.6;color:var(--text);background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:12px 14px}
+.sem-note b{color:var(--gold)}
+@media(max-width:640px){#semantic .cols{grid-template-columns:1fr}}
