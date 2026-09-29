@@ -1,0 +1,7 @@
+# Runtime (needed to run the experiment)
+fastapi>=0.110,<1.0
+uvicorn>=0.27,<1.0
+httpx>=0.27,<1.0
+
+# Development / tests only (not needed to run the experiment):
+#   pip install pytest>=8,<10
