@@ -79,7 +79,26 @@ def home():
       <button>Sign in</button>
     </form><p class="muted">Demo account: admin / admin</p></div>
   <div class="card"><h2>Your documents</h2><ul>{files}</ul></div>
-</div>"""
+</div>
+<div class="card" style="margin-top:12px">
+  <h2>Ask our assistant</h2>
+  <form class="search" id="ai-form" onsubmit="return false">
+    <input id="ai-q" placeholder="e.g. What is your return policy?" aria-label="Ask the assistant">
+    <button id="ai-send">Ask</button>
+  </form>
+  <p id="ai-out" class="muted" style="margin-top:10px"></p>
+</div>
+<script>
+document.getElementById('ai-send').addEventListener('click', async () => {{
+  const q = document.getElementById('ai-q').value, out = document.getElementById('ai-out');
+  out.textContent = 'Thinking...';
+  try {{
+    const r = await fetch('/ai/ask', {{method:'POST', headers:{{'Content-Type':'application/json'}}, body: JSON.stringify({{message:q}})}});
+    if (r.status === 403) {{ const b = await r.json(); out.innerHTML = '<span class="bad">Blocked by Jev: ' + (b.category||'attack') + '</span> - ' + (b.reason||''); return; }}
+    const d = await r.json(); out.textContent = d.reply || JSON.stringify(d);
+  }} catch (e) {{ out.textContent = 'Error: ' + e.message; }}
+}});
+</script>"""
     return page("Shop", body)
 
 

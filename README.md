@@ -1,6 +1,8 @@
-# SOC Analyst Agent (Jev)
+# A shield for vibe-coded apps
 
-A defensive-security demo: a reverse proxy that sits in front of a small web app and classifies every incoming HTTP request as an attack or normal traffic using [Jev](https://openrouter.ai/typesafe/jev-1.13) (`typesafe/jev-1.13`, TypeSafe's structured-decision model, called through OpenRouter). Confident attacks are blocked; everything else is forwarded. A static dashboard replays a logged run so anyone can see what was blocked, what was allowed, and why.
+Apps built fast with AI ship without the security plumbing hand-built apps get. This is a **drop-in shield**: point it at any app and every request is judged before it lands, with **no rules to write and no tuning** — the opposite of a traditional WAF. It's a reverse proxy that classifies each request with [Jev](https://openrouter.ai/typesafe/jev-1.13) (`typesafe/jev-1.13`, TypeSafe's structured-decision model, via OpenRouter): confident attacks are blocked, everything else is forwarded. A static dashboard replays a logged run so anyone can see what was blocked and why.
+
+**Why not just a regex WAF?** A rule-based WAF catches known attack *shapes* (SQL syntax, `<script>`, `../`) and is strong there. Its blind spot is attacks with no signature — prompt injection against an app's AI, requests that ask it to leak data, business-logic abuse — which read as ordinary text. A judgment model can weigh intent. See **Semantic attacks** below and `dashboard/compare.html` for the head-to-head.
 
 ## Architecture
 
@@ -57,6 +59,29 @@ Options:
 Before any spend, the script prints a cost estimate and aborts if the projected cost is over $4 (≈ ₹350). A typical full run is well under $0.05 (≈ ₹4). The full corpus is 600 labelled requests in `fixtures/corpus.jsonl`.
 
 The run writes a log to `logs/run-<timestamp>.jsonl` and prints a summary.
+
+## Semantic attacks: what a signature WAF can't see
+
+This is the case for using a judgment model over a rule engine. `baselines/regex_waf.py` is a
+signature WAF (OWASP-CRS style). On classic payload attacks it is a fair baseline — it catches
+about 76% of the 600-set with zero false alarms. But on *semantic* attacks it is blind.
+
+`make_semantic_corpus.py` builds a set of attacks that carry no classic payload:
+- **prompt injection** — instructions that try to override or leak an AI assistant's rules;
+- **data exfiltration** — plain-language requests to return data the app should not expose;
+- **business-logic abuse** — validly-formed requests with hostile intent (price/coupon/role manipulation).
+
+The signature WAF catches **0 of these** (they are ordinary English). To see whether Jev catches
+them, run the same set through the proxy and compare:
+
+```bash
+python3 make_semantic_corpus.py                                   # writes fixtures/semantic_corpus.jsonl
+python3 run_experiment.py --corpus fixtures/semantic_corpus.jsonl # Jev's verdicts (needs the key)
+python3 tools/compare.py fixtures/semantic_corpus.jsonl logs/run-<ts>.jsonl dashboard/compare.json
+```
+
+Open `dashboard/compare.html` for the head-to-head. The regex column is computed offline and needs
+no key; only Jev's column needs the run.
 
 ## Live demo: browse a protected shop
 

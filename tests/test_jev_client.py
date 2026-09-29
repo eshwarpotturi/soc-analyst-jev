@@ -1,9 +1,12 @@
 import httpx
 import pytest
 
+import jev_client
 from jev_client import JevUnavailable, classify
 
-CATEGORIES = {
+# The canonical set the client actually sends (classic + semantic categories).
+CATEGORIES = set(jev_client.CATEGORIES)
+CLASSIC = {
     "none", "sql_injection", "xss", "path_traversal", "command_injection",
     "ssrf", "auth_bruteforce", "scanner_probe", "other_exploit",
 }
@@ -80,7 +83,7 @@ def test_request_shape_and_auth():
     cat = body["questions"]["category"]
     assert cat["type"] == "choice"
     assert set(cat["criteria"]) == CATEGORIES
-    assert len(cat["criteria"]) == 9
+    assert CLASSIC <= set(cat["criteria"])  # classic categories still present
     assert cat["criteria"]["none"] == "Legitimate, benign traffic"
 
 

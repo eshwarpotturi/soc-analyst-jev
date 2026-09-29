@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Regex WAF vs Jev</title>
+<meta name="description" content="Head-to-head on semantic attacks a signature WAF cannot see: prompt injection, data-exfiltration and business-logic abuse.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap">
+<style>
+:root{
+  --bg:#0b0f14;--panel:#121923;--line:#1f2a38;--text:#d5dde8;--dim:#7d8b9e;
+  --green:#3ddc84;--red:#ff4d5e;--amber:#e0b341;--accent:#4cc9f0;--gold:#e8bd6a;
+  --display:'Cinzel',Georgia,serif;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 16px 40px}
+h1{font-family:var(--display);color:var(--gold);font-size:26px;margin:0 0 4px}
+.lede{color:var(--dim);max-width:70ch;margin:0 0 20px}
+.lede b{color:var(--text)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;min-width:0}
+.card h2{font-family:var(--display);font-size:18px;margin:0 0 2px}
+.card .sub{color:var(--dim);font-size:12.5px;margin:0 0 14px}
+.big{font-size:44px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.big.miss{color:var(--red)}.big.win{color:var(--green)}.big.pending{color:var(--dim)}
+.of{color:var(--dim);font-size:15px;font-weight:400}
+.stat-l{color:var(--dim);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.mini{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+.mini div b{font-variant-numeric:tabular-nums}
+.mini .k{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.verdict{margin-top:14px;font-size:13px;padding:8px 10px;border-radius:6px;border-left:3px solid}
+.verdict.bad{background:#2a1218;border-color:var(--red)}
+.verdict.good{background:#0e2018;border-color:var(--green)}
+.verdict.pending{background:#0e141c;border-color:var(--dim);color:var(--dim)}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:26px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--dim);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+td .cat{color:var(--accent);font-size:11px;white-space:nowrap}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600}
+.tag.allowed{background:#2a1218;color:#ff8a95}.tag.blocked{background:#0e2018;color:#7ee2a8}.tag.pending{background:#0e141c;color:var(--dim)}
+.msg{color:var(--text)}
+.note{color:var(--dim);font-size:12.5px;margin-top:22px;border-top:1px solid var(--line);padding-top:12px}
+.scroll{overflow-x:auto}
+@media(max-width:640px){.cols{grid-template-columns:1fr}.big{font-size:38px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Signature WAF vs Jev</h1>
+  <p class="lede">A rule-based WAF matches known attack <b>shapes</b> &mdash; SQL syntax, <code>&lt;script&gt;</code>, <code>../</code>. It is strong there. But a new class of attack carries <b>no signature</b>: prompt injection against an app's AI, requests that ask it to leak data, and business-logic abuse. These read as ordinary text. This is the same set of requests through both.</p>
+  <div class="cols" id="cols"></div>
+  <h3>What each let through</h3>
+  <div class="scroll"><table id="examples"><thead><tr><th>Semantic attack (request)</th><th>Type</th><th>Regex WAF</th><th>Jev</th></tr></thead><tbody></tbody></table></div>
+  <p class="note" id="note"></p>
+</div>
+<script>
+(function(){
+  const load = window.__COMPARE__ ? Promise.resolve(window.__COMPARE__)
+    : fetch('compare.json').then(r=>{if(!r.ok)throw new Error('compare.json HTTP '+r.status);return r.json();});
+  load.then(render).catch(e=>{document.getElementById('cols').innerHTML='<p style="color:var(--dim)">Could not load compare.json: '+e.message+'</p>';});
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+  function card(a, total){
+    if(!a){
+      return `<div class="card"><h2>Jev</h2><p class="sub">judgment model</p>
+        <div class="big pending">&mdash;</div><div class="stat-l">caught of ${total} attacks</div>
+        <div class="verdict pending">Pending: run Jev over the same set to fill this in.</div></div>`;
+    }
+    const isJev = a.name.toLowerCase().includes('jev');
+    const cls = a.caught===0 ? 'miss' : (isJev ? 'win' : '');
+    const pct = a.attacks ? Math.round(100*a.caught/a.attacks) : 0;
+    const vClass = a.caught===0?'bad':(isJev?'good':'');
+    const vText = a.caught===0
+      ? 'Blind to this class &mdash; every semantic attack passed through.'
+      : (isJev ? `Caught ${pct}% by reading intent, not signatures.` : `Caught ${pct}%.`);
+    return `<div class="card"><h2>${esc(a.name.split(' (')[0])}</h2><p class="sub">${esc(a.name.includes('(')?a.name.split('(')[1].replace(')',''):'')}</p>
+      <div class="big ${cls}">${a.caught}<span class="of"> / ${a.attacks}</span></div>
+      <div class="stat-l">semantic attacks caught</div>
+      <div class="mini"><div><b>${a.missed}</b><div class="k">missed</div></div><div><b>${a.false_alarms}</b><div class="k">false alarms</div></div></div>
+      <div class="verdict ${vClass}">${vText}</div></div>`;
+  }
+
+  function render(d){
+    const R=d.approaches.regex, J=d.approaches.jev;
+    document.getElementById('cols').innerHTML = card(R, d.attacks) + card(J, d.attacks);
+    const tb=document.querySelector('#examples tbody');
+    tb.innerHTML = (d.examples||[]).map(e=>`<tr>
+      <td class="msg">${esc(e.text)}</td>
+      <td class="cat">${esc((e.category||'').replace(/_/g,' '))}</td>
+      <td><span class="tag ${e.regex}">${e.regex}</span></td>
+      <td><span class="tag ${e.jev}">${e.jev}</span></td></tr>`).join('');
+    const jTxt = J ? `${J.caught} of ${d.attacks}` : 'pending a Jev run';
+    document.getElementById('note').textContent =
+      `Set: ${d.total} requests (${d.attacks} semantic attacks, ${d.benign} legitimate). `+
+      `Regex WAF caught ${R.caught} of ${d.attacks}; Jev caught ${jTxt}. `+
+      `The regex WAF is not a strawman: on classic payload attacks it catches most. Its gap is semantic intent.`;
+  }
+})();
+</script>
+</body>
+</html>
