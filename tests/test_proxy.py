@@ -121,3 +121,48 @@ def test_truth_headers_logged_but_not_forwarded_or_classified(env, monkeypatch):
     assert fwd_headers.get("x-real") == "keep-me"
     assert "xss" not in seen_states[0].lower().replace("x-truth", "")
     assert "truth" not in seen_states[0].lower()
+
+
+def test_unexpected_classify_error_still_fails_open(env, monkeypatch):
+    client, log, forwarded = env
+
+    def boom(state, client=None):
+        raise ValueError("bad json")
+
+    monkeypatch.setattr(proxy, "classify", boom)
+    resp = client.get("/ok")
+    assert resp.status_code == 200 and resp.text == "target ok"
+    assert len(forwarded) == 1
+    (line,) = read_log(log)
+    assert set(line) == LOG_FIELDS
+    assert line["action"] == "error"
+    assert "ValueError" in line["reason"]
+    assert line["is_attack"] is None and line["cost"] == 0
+
+
+def test_build_state_failure_falls_back_and_still_forwards(env, monkeypatch):
+    client, log, forwarded = env
+    seen = []
+
+    def bad_state(*a, **k):
+        raise KeyError("x")
+
+    monkeypatch.setattr(proxy, "build_state", bad_state)
+    monkeypatch.setattr(
+        proxy, "classify",
+        lambda state, client=None: seen.append(state) or JevResult(0.01, "none", 0.9, {}, 0.0),
+    )
+    assert client.get("/fallback").status_code == 200
+    assert seen == ["GET /fallback"]
+    assert read_log(log)[0]["action"] == "allow"
+
+
+def test_forwarded_path_keeps_raw_percent_encoding(env, monkeypatch):
+    client, log, forwarded = env
+    monkeypatch.setattr(
+        proxy, "classify", lambda state, client=None: JevResult(0.01, "none", 0.9, {}, 0.0)
+    )
+    resp = client.get("/a%2Fb%23c/%2e%2e/x?q=%41")
+    assert resp.status_code == 200
+    assert forwarded[0]["path"] == "/a%2Fb%23c/%2e%2e/x"
+    assert forwarded[0]["query"] == "q=%41"

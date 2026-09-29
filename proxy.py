@@ -78,19 +78,29 @@ def write_log(entry: dict) -> None:
 async def handle(request: Request, full_path: str) -> Response:
     raw_body = await request.body()
     # classify/forward use blocking httpx; keep them off the event loop.
+    # Forward the RAW (still percent-encoded) path so the target sees exactly the
+    # request that was classified; the decoded path is only for state/log.
+    raw_path = request.scope.get("raw_path")
+    raw_path = raw_path.decode("latin-1").split("?", 1)[0] if raw_path else request.url.path
     return await run_in_threadpool(
-        process, request.method, request.url.path, request.url.query,
-        dict(request.headers), raw_body,
+        process, request.method, request.scope["path"],
+        request.scope["query_string"].decode("latin-1"),
+        dict(request.headers), raw_body, raw_path,
     )
 
 
-def process(method: str, path: str, query: str, headers: dict, raw_body: bytes) -> Response:
+def process(method: str, path: str, query: str, headers: dict, raw_body: bytes,
+            raw_path: str | None = None) -> Response:
+    fwd_path = raw_path if raw_path is not None else path
     truth_label = headers.get("x-truth-label")
     truth_category = headers.get("x-truth-category")
     # Ground truth is for the log only: never shown to Jev or the target.
     headers = {k: v for k, v in headers.items() if k.lower() not in TRUTH_HEADERS}
 
-    state = build_state(method, path, query, headers, raw_body.decode("utf-8", errors="replace"))
+    try:
+        state = build_state(method, path, query, headers, raw_body.decode("utf-8", errors="replace"))
+    except Exception:
+        state = f"{method} {path}"  # fail-open: never 500 on a state-building fault
 
     entry = {
         "ts": datetime.now(timezone.utc).isoformat(),
@@ -111,14 +121,15 @@ def process(method: str, path: str, query: str, headers: dict, raw_body: bytes) 
     start = time.perf_counter()
     try:
         result = classify(state, client=_client)
-    except JevUnavailable as exc:
-        entry["latency_ms"] = round((time.perf_counter() - start) * 1000, 2)
-        entry["action"] = "error"
-        entry["reason"] = str(exc)
-        response = forward(method, path, query, headers, raw_body)
-    else:
         entry["latency_ms"] = round((time.perf_counter() - start) * 1000, 2)
         decision = decide(result)
+    except Exception as exc:  # JevUnavailable or any other classification-side fault: fail open
+        if entry["latency_ms"] is None:
+            entry["latency_ms"] = round((time.perf_counter() - start) * 1000, 2)
+        entry["action"] = "error"
+        entry["reason"] = str(exc) if isinstance(exc, JevUnavailable) else f"{type(exc).__name__}: {exc}"
+        response = forward(method, fwd_path, query, headers, raw_body)
+    else:
         entry.update(
             is_attack=result.is_attack,
             jev_category=result.category,
@@ -133,7 +144,7 @@ def process(method: str, path: str, query: str, headers: dict, raw_body: bytes) 
                 status_code=403,
             )
         else:
-            response = forward(method, path, query, headers, raw_body)
+            response = forward(method, fwd_path, query, headers, raw_body)
 
     write_log(entry)
     return response
