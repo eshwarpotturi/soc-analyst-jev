@@ -95,10 +95,12 @@ def build_runjson(log_lines):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    if len(argv) != 2:
-        print("usage: python tools/log_to_runjson.py <log.jsonl> <out.json>", file=sys.stderr)
+    if len(argv) not in (2, 3):
+        print("usage: python tools/log_to_runjson.py <log.jsonl> <out.json> [note]", file=sys.stderr)
         return 2
     out = build_runjson(load_log(argv[0]))
+    if len(argv) == 3:
+        out["note"] = argv[2]  # shown on the dashboard, e.g. which threshold was applied
     Path(argv[1]).write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
     return 0
 

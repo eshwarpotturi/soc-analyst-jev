@@ -59,6 +59,7 @@
     const kpi = (l, v, c) => `<div class="kpi"><div class="v ${c || ''}">${v}</div><div class="l">${l}</div></div>`;
     const m = metrics;
     $('accuracy').innerHTML =
+      (run.note ? '<p class="note">' + esc(run.note) + '</p>' : '') +
       '<div class="kpis">' +
       kpi('Precision (blocks that were real attacks)', fmtPct(m.precision), 'x') +
       kpi('Recall (attacks caught)', fmtPct(m.recall), 'x') +

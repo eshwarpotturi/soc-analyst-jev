@@ -1,10 +1,17 @@
-"""Pure block/allow decision from a Jev classification. Conservative: favors low false positives."""
+"""Pure block/allow decision from a Jev classification.
+
+Thresholds calibrated on the 600-request run (see tools/rescore_log.py): every benign
+request scored <= 0.19 on "is this an attack?", every attack >= 0.23. Blocking at 0.30
+caught 85/90 attacks with 0/510 false alarms while keeping a margin above the benign
+maximum. The first run used 0.80 / 0.50 (53/90 caught, 0 false alarms).
+The category-confidence gate is off (0.0) but kept so it can be re-enabled.
+"""
 from dataclasses import dataclass
 
 from jev_client import JevResult
 
-BLOCK_ATTACK_THRESHOLD = 0.80
-BLOCK_CONFIDENCE_THRESHOLD = 0.50
+BLOCK_ATTACK_THRESHOLD = 0.30
+BLOCK_CONFIDENCE_THRESHOLD = 0.0
 
 
 @dataclass
