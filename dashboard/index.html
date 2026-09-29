@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jev SOC Analyst - replay</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+</head>
+<body>
+<header>
+  <h1>Jev SOC Analyst <span>replay</span></h1>
+  <div class="controls">
+    <button id="play">Play</button>
+    <button id="restart">Restart</button>
+    <label>Speed
+      <select id="speed">
+        <option value="1">1x</option>
+        <option value="2" selected>2x</option>
+        <option value="4">4x</option>
+        <option value="8">8x</option>
+      </select>
+    </label>
+  </div>
+  <div class="counter" id="counter">0 / 0 processed &middot; 0 blocked</div>
+</header>
+<div class="progress"><div id="bar"></div></div>
+<main>
+  <section class="panel" id="p-stream"><h2>Request stream</h2><div id="stream" class="scroll"></div></section>
+  <section class="panel" id="p-log"><h2>Red-flag log <small>blocked requests, newest first</small></h2><div id="redlog" class="scroll"></div></section>
+  <section class="panel" id="p-race"><h2>Attack categories blocked <small>bar chart race</small></h2><div id="race"></div></section>
+  <section class="panel" id="p-acc"><h2>Accuracy <small>whole run</small></h2><div id="accuracy"></div></section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
