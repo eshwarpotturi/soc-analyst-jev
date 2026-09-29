@@ -54,7 +54,7 @@ Options:
 - `--limit 50` replays only the first 50 corpus requests: a cheap smoke test.
 - `--attacker-count N` adds N generated attacker requests on top of the corpus (capped at 100).
 
-Before any spend, the script prints a cost estimate and aborts if the projected cost is over $4. A typical full run is well under $0.05. The full corpus is 600 labelled requests in `fixtures/corpus.jsonl`.
+Before any spend, the script prints a cost estimate and aborts if the projected cost is over $4 (≈ ₹350). A typical full run is well under $0.05 (≈ ₹4). The full corpus is 600 labelled requests in `fixtures/corpus.jsonl`.
 
 The run writes a log to `logs/run-<timestamp>.jsonl` and prints a summary.
 

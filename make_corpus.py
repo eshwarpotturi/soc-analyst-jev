@@ -9,9 +9,12 @@ import random
 from pathlib import Path
 from urllib.parse import quote
 
+from jev_client import CATEGORIES
+
 OUT = Path(__file__).resolve().parent / "fixtures" / "corpus.jsonl"
 SEED = 1337
 N_BENIGN = 510
+ATTACK_CATEGORIES = [c for c in CATEGORIES if c != "none"]  # canonical, drift-proof
 
 UAS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
@@ -59,6 +62,7 @@ def malicious(rng):
     out = []
 
     def add(cat, method, path, query="", body="", headers=None):
+        assert cat in ATTACK_CATEGORIES, f"non-canonical category: {cat}"
         out.append(req(method, path, query, headers or ua(), body, "malicious", cat))
 
     for p in ["' OR '1'='1", "' OR 1=1--", "admin'--", "1' UNION SELECT NULL,NULL--",

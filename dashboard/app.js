@@ -3,6 +3,8 @@
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const MAXROWS = 60;
+  // Approximate fixed USD->INR rate, for display only.
+  const USD_TO_INR = 88;
 
   fetch('run.json').then((r) => {
     if (!r.ok) throw new Error('run.json HTTP ' + r.status);
@@ -40,7 +42,7 @@
       const data = cats.map((c) => ({c, v: counts[c] || 0}))
         .sort((a, b) => b.v - a.v || d3.ascending(a.c, b.c));
       x.domain([0, Math.max(1, d3.max(data, (d) => d.v) || 0)]);
-      const dur = animate ? 250 : 0;
+      const dur = animate ? Math.min(250, Math.max(30, 120 / (+$('speed').value || 1))) : 0;
       svg.selectAll('g.bar').data(data, (d) => d.c).join(
         (enter) => {
           const g = enter.append('g').attr('class', 'bar').attr('transform', (d, i) => `translate(${M.l},${y(i)})`);
@@ -74,7 +76,7 @@
       '<div class="kpis">' +
       kpi('Total requests', esc(m.total_requests)) + kpi('Blocked', esc(m.blocked), 'r') +
       kpi('Allowed', esc(m.allowed), 'g') + kpi('Errors', esc(m.errors), 'a') +
-      kpi('Avg latency (ms)', fmtNum(m.avg_latency_ms, 0)) + kpi('Total cost (USD)', '$' + fmtNum(m.total_cost, 4)) + '</div>';
+      kpi('Avg latency (ms)', fmtNum(m.avg_latency_ms, 0)) + kpi('Total cost (USD)', '$' + fmtNum(m.total_cost, 4) + '<div class="l">≈ ₹' + fmtNum(m.total_cost * USD_TO_INR, 2) + '</div>') + '</div>';
 
     // ---- playback ----
     function addEvent(e) {

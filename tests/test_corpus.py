@@ -3,12 +3,11 @@ from pathlib import Path
 
 import pytest
 
+import jev_client
+
 CORPUS = Path(__file__).resolve().parent.parent / "fixtures" / "corpus.jsonl"
 FIELDS = {"method", "path", "query", "headers", "body", "true_label", "true_category"}
-CATEGORIES = {
-    "none", "sql_injection", "xss", "path_traversal", "command_injection",
-    "ssrf", "auth_bruteforce", "scanner_probe", "other_exploit",
-}
+CATEGORIES = set(jev_client.CATEGORIES)
 ATTACKS = CATEGORIES - {"none"}
 
 
@@ -35,7 +34,10 @@ def test_label_distribution(rows):
 
 
 def test_categories_canonical(rows):
-    assert {r["true_category"] for r in rows} <= CATEGORIES
+    used = {r["true_category"] for r in rows}
+    assert used <= CATEGORIES
+    assert set(jev_client.CATEGORIES) >= used
+    assert (used - {"none"}) <= set(jev_client.CATEGORIES) - {"none"}
 
 
 def test_label_category_consistency(rows):
