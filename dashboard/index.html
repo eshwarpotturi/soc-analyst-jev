@@ -2,18 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Jev SOC Analyst - replay</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jev's Keep</title>
+<meta name="description" content="Replay of a real Jev run: each HTTP request is an arrow at the castle. Blocked attacks splinter on the wall, allowed requests enter as villagers. Full analytics below.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 </head>
 <body>
 <header>
-  <h1>Jev SOC Analyst <span>replay</span></h1>
+  <h1>Jev&rsquo;s Keep <span>SOC analyst replay</span></h1>
   <div class="controls">
-    <button id="play">Play</button>
-    <button id="restart">Restart</button>
-    <label>Speed
+    <button id="play" type="button">Pause</button>
+    <button id="restart" type="button">Restart</button>
+    <label for="speed">Speed
       <select id="speed">
         <option value="1">1x</option>
         <option value="2" selected>2x</option>
@@ -22,14 +26,36 @@
       </select>
     </label>
   </div>
-  <div class="counter" id="counter">0 / 0 processed &middot; 0 blocked</div>
+  <div class="counter" id="counter">0 / 0 judged &middot; 0 blocked</div>
 </header>
 <div class="progress"><div id="bar"></div></div>
-<main>
+
+<section id="siege" aria-label="Castle siege animation">
+  <canvas id="castle"></canvas>
+  <div class="chips">
+    <div class="chip"><b id="s-seen">0</b><span>Incoming</span></div>
+    <div class="chip good"><b id="s-in">0</b><span>Admitted</span></div>
+    <div class="chip bad"><b id="s-block">0</b><span>Repelled</span></div>
+  </div>
+  <div class="legend">
+    <div><i class="dot good"></i>Allowed: walks in as a villager</div>
+    <div><i class="dot bad"></i>Blocked by Jev: splinters on the wall</div>
+  </div>
+  <div id="done" hidden>
+    <div class="card">
+      <h2>The keep holds</h2>
+      <p id="done-line"></p>
+      <p><a href="#analytics">See the full analytics</a></p>
+    </div>
+  </div>
+  <a class="jump" href="#analytics">Skip to the numbers &darr;</a>
+</section>
+
+<main id="analytics">
+  <section class="panel" id="p-acc"><h2>Accuracy <small>whole run</small></h2><div id="accuracy"></div></section>
+  <section class="panel" id="p-race"><h2>Attack categories blocked <small>bar chart race</small></h2><div id="race"></div></section>
   <section class="panel" id="p-stream"><h2>Request stream</h2><div id="stream" class="scroll"></div></section>
   <section class="panel" id="p-log"><h2>Red-flag log <small>blocked requests, newest first</small></h2><div id="redlog" class="scroll"></div></section>
-  <section class="panel" id="p-race"><h2>Attack categories blocked <small>bar chart race</small></h2><div id="race"></div></section>
-  <section class="panel" id="p-acc"><h2>Accuracy <small>whole run</small></h2><div id="accuracy"></div></section>
 </main>
 <script src="app.js"></script>
 </body>
