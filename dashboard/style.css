@@ -94,3 +94,4 @@ h2 small{text-transform:none;letter-spacing:0;margin-left:6px;opacity:.7}
 .sem-note{margin-top:18px;font-size:13.5px;line-height:1.6;color:var(--text);background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;padding:12px 14px}
 .sem-note b{color:var(--gold)}
 @media(max-width:640px){#semantic .cols{grid-template-columns:1fr}}
+.legend .lg-dim{opacity:.6}

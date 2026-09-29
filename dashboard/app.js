@@ -107,7 +107,7 @@
     // ================= shared playback =================
     let spawned = 0, judged = 0, blockedSoFar = 0, admitted = 0, repelled = 0;
     let playing = false, acc = 0, last = performance.now();
-    let arrows = [], sparks = [], folk = [];
+    let arrows = [], sparks = [], folk = [], gateGlow = 0;
 
     function updateCounter() {
       $('counter').textContent = `${judged} / ${total} judged · ${blockedSoFar} blocked`;
@@ -118,10 +118,13 @@
     function spawn(ev) {
       spawned++;
       const sy = H * 0.14 + Math.random() * (G.groundY - 10 - H * 0.14);
+      // Shape = what the request truly is; outcome (target) = Jev's decision.
+      const kind = ev.true_label === 'malicious' ? 'arrow' : 'messenger';
+      const passes = ev.action !== 'block'; // allow or fail-open error -> through the gate
       let tx, ty;
-      if (ev.action === 'allow') { tx = G.gateCX; ty = G.gateCY; }
+      if (passes) { tx = G.gateCX; ty = G.gateCY; }
       else { tx = G.castleX + 6; ty = G.wallTop + 14 + Math.random() * (G.groundY - 24 - (G.wallTop + 14)); }
-      arrows.push({sx: -24, sy, tx, ty, t: 0, ev});
+      arrows.push({sx: -24, sy, tx, ty, t: 0, ev, kind, passes});
     }
 
     function burst(x0, y0, col, n) {
@@ -132,18 +135,20 @@
     function land(ar) {
       const ev = ar.ev;
       judged++;
-      if (ev.action === 'allow') {
-        admitted++;
-        folk.push({x: G.gateCX, y: G.groundY - 2, vx: .5 + Math.random() * .3, life: 1, ph: Math.random() * 6.28});
-        burst(G.gateCX, G.gateCY, '#cdeacc', 5);
-      } else if (ev.action === 'block') {
+      if (ev.action === 'block') {
         repelled++; blockedSoFar++;
-        burst(ar.tx, ar.ty, '#ff7a54', 16);
-        sparks.push({x: ar.tx - 4, y: ar.ty, vx: 0, vy: 0, life: 1.6, color: '#ff5a4d', fixed: true,
-          label: (ev.jev_category || '').replace(/_/g, ' ')});
+        // Red burst for a real attack stopped; amber for a legitimate request wrongly turned away.
+        const falseAlarm = ar.kind === 'messenger';
+        burst(ar.tx, ar.ty, falseAlarm ? '#e0b341' : '#ff7a54', falseAlarm ? 10 : 16);
+        sparks.push({x: ar.tx - 4, y: ar.ty, vx: 0, vy: 0, life: 1.6, fixed: true,
+          color: falseAlarm ? '#e0b341' : '#ff5a4d',
+          label: (falseAlarm ? 'false alarm: ' : '') + (ev.jev_category || '').replace(/_/g, ' ')});
       } else {
-        repelled++;
-        burst(ar.tx, ar.ty, '#8b93a7', 8);
+        admitted++;
+        gateGlow = 1; // green pulse on the gate as something passes through
+        // It continues through the gate into the keep, then fades. Keeps its shape/colour.
+        folk.push({x: G.gateCX, y: G.gateCY, vx: .8 + Math.random() * .5, life: 1, kind: ar.kind});
+        burst(G.gateCX, G.gateCY, ar.kind === 'arrow' ? '#ff9a90' : '#8ee6b0', 5);
       }
       addEvent(ev);
       drawRace(judged, true);
@@ -163,9 +168,10 @@
         if (!p.fixed && k) { p.x += p.vx; p.y += p.vy; p.vy += 0.12; }
         p.life -= dt / (p.fixed ? 1400 : 700) * k;
         if (p.life <= 0) sparks.splice(i, 1); }
+      if (k && gateGlow > 0) gateGlow = Math.max(0, gateGlow - dt / 450);
       for (let i = folk.length - 1; i >= 0; i--) { const f = folk[i];
-        if (k) { f.x += f.vx * speed() * .6; f.ph += 0.25; }
-        if (f.x > G.castleX + G.castleW * 0.62) f.life -= dt / 500 * k;
+        if (k) { f.x += f.vx * speed(); }
+        if (f.x > G.castleX + G.castleW * 0.55) f.life -= dt / 420 * k; // fade as it enters the keep
         if (f.life <= 0) folk.splice(i, 1); }
       if (playing && spawned >= total && !arrows.length && !folk.length && !sparks.length) { pause(); showDone(); }
     }
@@ -203,29 +209,44 @@
       ctx.fillText('J', gateCX, wallTop + 28);
     }
 
+    function redArrow(angle) {
+      ctx.rotate(angle);
+      ctx.strokeStyle = '#c9553f'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(6, 0); ctx.stroke();
+      ctx.strokeStyle = '#8f3a2c';
+      ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(-20, -3); ctx.moveTo(-16, 0); ctx.lineTo(-20, 3); ctx.stroke();
+      ctx.fillStyle = '#ff5a4d';
+      ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(0, -3.2); ctx.lineTo(0, 3.2); ctx.closePath(); ctx.fill();
+    }
+
+    function greenMessenger(angle) {
+      // a glowing orb with a short comet trail (a friendly "visitor", not a weapon)
+      const tr = ctx.createRadialGradient(0, 0, 0, 0, 0, 9);
+      tr.addColorStop(0, 'rgba(93,211,138,.9)'); tr.addColorStop(1, 'rgba(93,211,138,0)');
+      ctx.fillStyle = tr; ctx.beginPath(); ctx.arc(0, 0, 9, 0, 6.28); ctx.fill();
+      ctx.save(); ctx.rotate(angle);
+      ctx.strokeStyle = 'rgba(140,230,176,.5)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(-2, 0); ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = '#8ee6b0'; ctx.beginPath(); ctx.arc(0, 0, 3.4, 0, 6.28); ctx.fill();
+    }
+
     function drawArrow(ar) {
       const t = ease(Math.min(1, ar.t));
       const ax = ar.sx + (ar.tx - ar.sx) * t, ay = ar.sy + (ar.ty - ar.sy) * t;
-      const bad = ar.ev.action !== 'allow';
-      ctx.save(); ctx.translate(ax, ay); ctx.rotate(Math.atan2(ar.ty - ar.sy, ar.tx - ar.sx));
-      ctx.strokeStyle = bad ? '#c9553f' : '#d9c9a3'; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(6, 0); ctx.stroke();
-      ctx.strokeStyle = bad ? '#8f3a2c' : '#9a8a68';
-      ctx.beginPath(); ctx.moveTo(-16, 0); ctx.lineTo(-20, -3); ctx.moveTo(-16, 0); ctx.lineTo(-20, 3); ctx.stroke();
-      ctx.fillStyle = bad ? '#ff5a4d' : '#efe4c6';
-      ctx.beginPath(); ctx.moveTo(6, 0); ctx.lineTo(0, -3.2); ctx.lineTo(0, 3.2); ctx.closePath(); ctx.fill();
+      const angle = Math.atan2(ar.ty - ar.sy, ar.tx - ar.sx);
+      ctx.save(); ctx.translate(ax, ay);
+      if (ar.kind === 'arrow') redArrow(angle); else greenMessenger(angle);
       ctx.restore();
     }
 
     function drawFolk(f) {
-      const bob = Math.sin(f.ph) * 1.6, s = Math.sin(f.ph) * 2;
+      // a request that was let in, gliding through the gate into the keep and fading
+      ctx.save();
       ctx.globalAlpha = Math.max(0, Math.min(1, f.life));
-      ctx.fillStyle = '#5fd38a';
-      ctx.fillRect(f.x - 2, f.y - 14 + bob, 4, 10);
-      ctx.beginPath(); ctx.arc(f.x, f.y - 17 + bob, 3, 0, 6.28); ctx.fill();
-      ctx.strokeStyle = '#3f9c66'; ctx.lineWidth = 1.6;
-      ctx.beginPath(); ctx.moveTo(f.x, f.y - 4 + bob); ctx.lineTo(f.x - 2 + s, f.y + bob);
-      ctx.moveTo(f.x, f.y - 4 + bob); ctx.lineTo(f.x + 2 - s, f.y + bob); ctx.stroke();
+      ctx.translate(f.x, f.y);
+      if (f.kind === 'arrow') redArrow(0); else greenMessenger(0);
+      ctx.restore();
       ctx.globalAlpha = 1;
     }
 
@@ -240,6 +261,12 @@
       for (const s of stars) { ctx.globalAlpha = reduce ? 0.7 : 0.4 + 0.4 * Math.abs(Math.sin(now + s.tw)); ctx.fillRect(s.x, s.y, s.r, s.r); }
       ctx.globalAlpha = 1;
       drawCastle();
+      if (gateGlow > 0) {
+        const gy = G.gateTop, gh = G.gateH, gw = G.gateW;
+        const gr = ctx.createLinearGradient(0, gy, 0, gy + gh);
+        gr.addColorStop(0, `rgba(93,211,138,${0.5 * gateGlow})`); gr.addColorStop(1, 'rgba(93,211,138,0)');
+        ctx.fillStyle = gr; ctx.fillRect(G.gateCX - gw / 2, gy, gw, gh);
+      }
       for (const f of folk) drawFolk(f);
       for (const ar of arrows) drawArrow(ar);
       for (const p of sparks) {
@@ -270,7 +297,7 @@
     function pause() { playing = false; $('play').textContent = (judged >= total && total) ? 'Replay' : 'Play'; }
     function restart() {
       spawned = judged = blockedSoFar = admitted = repelled = 0; acc = 0;
-      arrows = []; sparks = []; folk = [];
+      arrows = []; sparks = []; folk = []; gateGlow = 0;
       stream.selectAll('.tile').remove(); redlog.selectAll('.flag').remove();
       if (redlog.select('#redempty').empty()) redlog.append('div').attr('class', 'empty').attr('id', 'redempty').text('No blocked requests yet.');
       $('done').hidden = true;
