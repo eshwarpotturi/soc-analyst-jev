@@ -72,8 +72,9 @@ def format_summary(path: str, counts: dict) -> str:
             f"error={counts['error']}")
 
 
-def load_corpus(limit=None) -> list[dict]:
-    rows = [json.loads(l) for l in CORPUS_PATH.read_text(encoding="utf-8").splitlines() if l.strip()]
+def load_corpus(limit=None, path=None) -> list[dict]:
+    src = Path(path) if path else CORPUS_PATH
+    rows = [json.loads(l) for l in src.read_text(encoding="utf-8").splitlines() if l.strip()]
     return rows[:limit] if limit else rows
 
 
@@ -85,6 +86,7 @@ def parse_args(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--attacker-count", type=int, default=0)
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--corpus", default=None, help="path to a corpus .jsonl (default: fixtures/corpus.jsonl)")
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--target-port", type=int, default=8000)
     ap.add_argument("--proxy-port", type=int, default=8080)
@@ -148,7 +150,7 @@ def main(argv=None) -> int:
     if not os.environ.get("OPENROUTER_API_KEY"):
         print("OPENROUTER_API_KEY is not set; set it in the environment and retry.", file=sys.stderr)
         return 1
-    requests = load_corpus(args.limit) + generate_attackers(args.attacker_count)
+    requests = load_corpus(args.limit, args.corpus) + generate_attackers(args.attacker_count)
     step = max(1, len(requests) // SAMPLE_SIZE)
     sample = [_state(r) for r in requests[::step][:SAMPLE_SIZE]]
     est = estimate_cost(sample, len(requests))

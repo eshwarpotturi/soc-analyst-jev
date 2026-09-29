@@ -4,6 +4,7 @@ Malicious entries are standard, publicly documented detection signatures
 (OWASP testing guide / CRS regression style) for benchmarking a classifier.
 Deterministic: seeded RNG, same output on every run.
 """
+import argparse
 import json
 import random
 from pathlib import Path
@@ -126,15 +127,65 @@ def malicious(rng):
     return out
 
 
-def main():
-    rng = random.Random(SEED)
-    rows = [benign(rng) for _ in range(N_BENIGN)] + malicious(rng)
+# Routes/params used to place attacks in unseen contexts (augmentation only).
+ROUTES_Q = ["/search", "/find", "/q", "/items", "/lookup", "/api/search", "/products"]
+PARAMS_Q = ["q", "query", "term", "search", "keyword", "name", "id", "filter"]
+
+
+def _vary_headers(row, rng):
+    """Fresh User-Agent and optional proxy/accept headers; never touches the payload."""
+    h = dict(row.get("headers") or {})
+    h["User-Agent"] = rng.choice(UAS)
+    if rng.random() < 0.5:
+        h["X-Forwarded-For"] = ".".join(str(rng.randint(1, 254)) for _ in range(4))
+    if rng.random() < 0.3:
+        h["Accept"] = "text/html,application/xhtml+xml"
+    return h
+
+
+def _augment(row, rng):
+    """Place a known attack in a new, unseen context: different route, parameter name and
+    headers. The payload value itself is carried over unchanged from the source row."""
+    r = dict(row)
+    r["headers"] = _vary_headers(row, rng)
+    q = row.get("query") or ""
+    if "=" in q:  # payload lives in a query parameter -> re-route it
+        _, _, value = q.partition("=")
+        r["path"] = rng.choice(ROUTES_Q)
+        r["query"] = rng.choice(PARAMS_Q) + "=" + value
+    return r  # payload-in-path / body attacks keep their path & body, headers varied
+
+
+def build(seed, n_benign, n_attacks=None):
+    """Return corpus rows. n_attacks=None reproduces the original fixed attack set
+    (no augmentation); an integer samples that many augmented attacks from the pool."""
+    rng = random.Random(seed)
+    rows = [benign(rng) for _ in range(n_benign)]
+    pool = malicious(rng)
+    if n_attacks is None:
+        rows += pool
+    else:
+        rows += [_augment(rng.choice(pool), rng) for _ in range(n_attacks)]
     rng.shuffle(rows)
-    OUT.parent.mkdir(exist_ok=True)
-    with OUT.open("w") as f:
+    return rows
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Generate a labelled benign/malicious request corpus.")
+    ap.add_argument("--seed", type=int, default=SEED)
+    ap.add_argument("--benign", type=int, default=N_BENIGN)
+    ap.add_argument("--attacks", type=int, default=None,
+                    help="number of augmented attacks (unseen contexts); default: the fixed base set")
+    ap.add_argument("--out", default=str(OUT))
+    a = ap.parse_args(argv)
+    rows = build(a.seed, a.benign, a.attacks)
+    out = Path(a.out)
+    out.parent.mkdir(exist_ok=True)
+    with out.open("w") as f:
         for r in rows:
             f.write(json.dumps(r, sort_keys=True) + "\n")
-    print(f"wrote {len(rows)} rows to {OUT}")
+    mal = sum(r["true_label"] == "malicious" for r in rows)
+    print(f"wrote {len(rows)} rows ({mal} malicious, {len(rows) - mal} benign) to {out}")
 
 
 if __name__ == "__main__":
