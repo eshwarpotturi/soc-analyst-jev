@@ -13,7 +13,9 @@ from pathlib import Path
 import httpx
 from fastapi import FastAPI, Request, Response
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
+from html import escape
+from urllib.parse import unquote_plus
 
 from jev_client import JevUnavailable, classify
 from policy import decide
@@ -65,6 +67,34 @@ def forward(method: str, path: str, query: str, headers: dict, body: bytes) -> R
             client.close()
     out_headers = {k: v for k, v in resp.headers.items() if k.lower() not in RESPONSE_DROP}
     return Response(content=resp.content, status_code=resp.status_code, headers=out_headers)
+
+
+def blocked_page(method: str, path: str, query: str, category: str,
+                 attack: float, confidence: float) -> HTMLResponse:
+    """Browser-friendly 403 shown when Jev blocks a page load (API clients still get JSON)."""
+    req = escape(f"{method} {path}" + (f"?{unquote_plus(query)}" if query else ""))
+    label = escape((category or "attack").replace("_", " "))
+    html = f"""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Blocked by Jev</title>
+<style>
+body{{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+background:#0b0f14;color:#d5dde8;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}}
+.card{{max-width:560px;width:100%;background:#121923;border:1px solid #3a1d24;border-left:4px solid #ff4d5e;border-radius:10px;padding:24px}}
+h1{{margin:0 0 6px;color:#ff4d5e;font-size:24px}}
+.tag{{display:inline-block;background:#2a1218;color:#ff8a95;border-radius:999px;padding:3px 12px;font-weight:600}}
+dl{{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0}}
+dt{{color:#7d8b9e}}dd{{margin:0;font-variant-numeric:tabular-nums}}
+code{{display:block;background:#0e141c;border:1px solid #1f2a38;border-radius:6px;padding:10px;word-break:break-all;color:#e0b341}}
+a{{color:#4cc9f0}}
+</style></head><body><div class="card">
+<h1>Blocked by Jev</h1>
+<p>This request looked like an attack, so it never reached the website.</p>
+<span class="tag">{label}</span>
+<dl><dt>Attack probability</dt><dd>{attack:.0%}</dd><dt>Category confidence</dt><dd>{confidence:.0%}</dd></dl>
+<code>{req}</code>
+<p><a href="/shop">Back to the shop</a></p>
+</div></body></html>"""
+    return HTMLResponse(html, status_code=403)
 
 
 def write_log(entry: dict) -> None:
@@ -144,10 +174,14 @@ def process(method: str, path: str, query: str, headers: dict, raw_body: bytes,
             cost=result.cost,
         )
         if decision.action == "block":
-            response = JSONResponse(
-                {"blocked": True, "category": decision.category, "reason": decision.reason},
-                status_code=403,
-            )
+            if "text/html" in headers.get("accept", ""):
+                response = blocked_page(method, path, query, decision.category,
+                                        result.is_attack, result.category_confidence)
+            else:
+                response = JSONResponse(
+                    {"blocked": True, "category": decision.category, "reason": decision.reason},
+                    status_code=403,
+                )
         else:
             response = forward(method, fwd_path, query, headers, raw_body)
 

@@ -58,6 +58,19 @@ Before any spend, the script prints a cost estimate and aborts if the projected 
 
 The run writes a log to `logs/run-<timestamp>.jsonl` and prints a summary.
 
+## Live demo: browse a protected shop
+
+`shop.py` adds a small storefront ("ByteBazaar") to the target app: product search, a sign-in form and document downloads. `demo.py` starts the shop and the Jev proxy together so you can use it in a browser.
+
+```bash
+export OPENROUTER_API_KEY="your-key"      # Windows PowerShell: $env:OPENROUTER_API_KEY="..."
+python3 demo.py
+```
+
+Then open **http://127.0.0.1:8080/shop** (through the proxy). Normal browsing works as usual. When Jev judges a request to be an attack, the browser shows a **Blocked by Jev** page with the attack type and Jev's confidence, and the request never reaches the shop. The same shop without protection is at http://127.0.0.1:8000/shop for comparison.
+
+Every decision is logged to `logs/demo-<time>.jsonl`; turn it into dashboard data with `tools/log_to_runjson.py`. Each request costs a tiny fraction of a rupee. Press Ctrl+C to stop.
+
 ## Build the dashboard data
 
 Convert the log into the file the dashboard reads:

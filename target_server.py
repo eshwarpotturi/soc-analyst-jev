@@ -2,7 +2,10 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
+from shop import router as shop_router
+
 app = FastAPI(title="Demo Target App")
+app.include_router(shop_router)  # browser storefront at /shop
 
 DEMO_USER = "admin"
 DEMO_PASSWORD = "admin"
@@ -43,4 +46,4 @@ def files(name: str = ""):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="127.0.0.1", port=9000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)

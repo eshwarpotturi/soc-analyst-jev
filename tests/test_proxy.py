@@ -166,3 +166,21 @@ def test_forwarded_path_keeps_raw_percent_encoding(env, monkeypatch):
     assert resp.status_code == 200
     assert forwarded[0]["path"] == "/a%2Fb%23c/%2e%2e/x"
     assert forwarded[0]["query"] == "q=%41"
+
+
+def test_browser_request_gets_html_block_page(env, monkeypatch):
+    client, log, forwarded = env
+    monkeypatch.setattr(
+        proxy, "classify",
+        lambda state, client=None: JevResult(0.97, "sql_injection", 0.95, {}, 0.002),
+    )
+    resp = client.get("/shop/search", params={"q": "' OR '1'='1"},
+                      headers={"Accept": "text/html,application/xhtml+xml"})
+    assert resp.status_code == 403
+    assert resp.headers["content-type"].startswith("text/html")
+    assert "Blocked by Jev" in resp.text
+    assert "sql injection" in resp.text
+    assert "&#x27; OR" in resp.text or "&#39; OR" in resp.text  # request is shown, escaped
+    assert forwarded == []
+    (line,) = read_log(log)
+    assert line["action"] == "block"
