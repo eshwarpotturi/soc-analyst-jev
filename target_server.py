@@ -28,6 +28,18 @@ def login(creds: Login):
     raise HTTPException(status_code=401, detail="invalid credentials")
 
 
+class AiAsk(BaseModel):
+    message: str = ""
+
+
+@app.post("/ai/ask")
+def ai_ask(ask: AiAsk):
+    # A stand-in shop assistant. It only ever gives generic help and never reveals data or
+    # follows instructions in the message; the proxy is what stops hostile messages upstream.
+    return {"reply": "Thanks for your question! A shopping assistant would answer here. "
+                     "I can help with products, orders, returns and delivery."}
+
+
 @app.get("/search")
 def search(q: str = ""):
     return {"q": q}

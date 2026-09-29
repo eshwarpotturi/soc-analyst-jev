@@ -8,7 +8,11 @@ import jev_client
 CORPUS = Path(__file__).resolve().parent.parent / "fixtures" / "corpus.jsonl"
 FIELDS = {"method", "path", "query", "headers", "body", "true_label", "true_category"}
 CATEGORIES = set(jev_client.CATEGORIES)
-ATTACKS = CATEGORIES - {"none"}
+# The classic corpus covers the signature-based attack classes; semantic classes
+# (prompt_injection, data_exfiltration, abuse) live in the separate semantic corpus.
+ATTACKS = {"sql_injection", "xss", "path_traversal", "command_injection",
+           "ssrf", "auth_bruteforce", "scanner_probe", "other_exploit"}
+assert ATTACKS <= CATEGORIES  # stays in sync with the canonical set
 
 
 @pytest.fixture(scope="module")

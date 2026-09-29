@@ -57,6 +57,18 @@
   <section class="panel" id="p-stream"><h2>Request stream</h2><div id="stream" class="scroll"></div></section>
   <section class="panel" id="p-log"><h2>Red-flag log <small>blocked requests, newest first</small></h2><div id="redlog" class="scroll"></div></section>
 </main>
+
+<section id="semantic">
+  <div class="sem-inner">
+    <h2 class="sem-h">Beyond classic attacks: what a signature WAF can&rsquo;t see</h2>
+    <p class="sem-lede">The run above is <b>classic</b> attacks &mdash; SQL injection, XSS, path traversal &mdash; things with a recognisable <b>payload shape</b>. A rule-based WAF catches most of those. But a newer class of attack carries <b>no signature</b>: prompt injection against an app&rsquo;s AI, requests that ask it to leak data, and business-logic abuse. They read as ordinary English, so pattern rules never fire. Below, a signature WAF and Jev see the <b>same</b> set of these semantic attacks.</p>
+    <div class="cols" id="sem-cols"></div>
+    <h3 class="sem-sub">What each let through</h3>
+    <div class="scroll"><table id="sem-ex"><thead><tr><th>Semantic attack (the actual request)</th><th>Type</th><th>Regex WAF</th><th>Jev</th></tr></thead><tbody></tbody></table></div>
+    <div class="sem-note" id="sem-note"></div>
+  </div>
+</section>
+
 <script src="app.js"></script>
 </body>
 </html>

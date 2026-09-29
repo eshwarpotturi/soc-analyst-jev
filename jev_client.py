@@ -21,12 +21,19 @@ CATEGORIES = {
     "auth_bruteforce": "Credential guessing or brute-force against login endpoints",
     "scanner_probe": "Automated scanner or reconnaissance probing for known paths and files",
     "other_exploit": "Some other exploit attempt",
+    # Semantic attacks: hostile by meaning, with no classic payload signature.
+    "prompt_injection": "Prompt injection: instructions that try to override or leak an AI assistant's rules or system prompt",
+    "data_exfiltration": "Data exfiltration: a request asking the app to reveal data it should not return, such as other users' records, credentials, secrets, or database dumps",
+    "abuse": "Business-logic abuse: a validly-formed request with hostile intent, such as manipulating prices, coupons, roles, or other users' orders",
 }
 
 QUESTIONS = {
     "is_attack": {
         "type": "noul",
-        "instructions": "Is this HTTP request a hacking or exploitation attempt against the server?",
+        "instructions": "Is this HTTP request a hacking, exploitation, or abuse attempt against the "
+        "server or its AI assistant? Include attacks that carry no classic payload but are hostile "
+        "by intent, such as prompt injection, attempts to make the app leak data it should not "
+        "return, or manipulation of prices, roles, or other users' data.",
     },
     "category": {
         "type": "choice",
