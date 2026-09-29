@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+*.log
+logs/*.jsonl
+!logs/sample-run.jsonl
+.superpowers/
+.pytest_cache/
+.DS_Store
+node_modules/
