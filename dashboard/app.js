@@ -53,10 +53,10 @@
       r.setAttribute('role', 'listitem');
       r.innerHTML = '<span class="rk"></span><span class="nm">' + esc(nice(c)) +
         (SEMANTIC.has(c) ? ' <em>AI</em>' : '') + '</span><span class="track"><span class="fill"></span></span>' +
-        '<span class="ct">0</span><span class="up" aria-hidden="true">&#9650;</span>';
+        '<span class="ct">0</span><span class="mv" aria-hidden="true"></span>';
       r.querySelector('.fill').style.background = color[c];
       lanesEl.appendChild(r);
-      rows[c] = {el: r, rank: cats.indexOf(c), v: 0, upUntil: 0};
+      rows[c] = {el: r, rank: cats.indexOf(c), v: 0, upUntil: 0, downUntil: 0};
     }
     let laneGeo = {top: 0, h: 20};
     const laneY = (c) => laneGeo.top + (rows[c] ? rows[c].rank : 0) * laneGeo.h + laneGeo.h / 2;
@@ -68,7 +68,8 @@
       const now = performance.now();
       data.forEach((d, i) => {
         const r = rows[d.c];
-        if (i < r.rank && d.v > 0 && n > 0) r.upUntil = now + 1200; // it overtook someone
+        if (n > 0 && i < r.rank && d.v > 0) { r.upUntil = now + 1200; r.downUntil = 0; } // it overtook someone
+        if (n > 0 && i > r.rank) { r.downUntil = now + 1200; r.upUntil = 0; }            // it was overtaken
         r.rank = i; r.v = d.v;
         r.el.style.transform = `translateY(${i * laneGeo.h}px)`;
         r.el.querySelector('.rk').textContent = d.v ? '#' + (i + 1) : '';
@@ -76,11 +77,16 @@
         r.el.querySelector('.fill').style.width = (d.v / max * 100) + '%';
         r.el.classList.toggle('zero', d.v === 0);
         r.el.classList.toggle('rising', r.upUntil > now);
+        r.el.classList.toggle('falling', r.downUntil > now);
       });
     }
     function tickLanes() {
       const now = performance.now();
-      for (const c of cats) if (rows[c].el.classList.contains('rising') && rows[c].upUntil <= now) rows[c].el.classList.remove('rising');
+      for (const c of cats) {
+        const r = rows[c];
+        if (r.upUntil <= now) r.el.classList.remove('rising');
+        if (r.downUntil <= now) r.el.classList.remove('falling');
+      }
     }
     function flashLane(c, falseAlarm) {
       const r = rows[c]; if (!r) return;
@@ -406,7 +412,7 @@
       stream.selectAll('.tile').remove(); redlog.selectAll('.flag').remove();
       if (redlog.select('#redempty').empty()) redlog.append('div').attr('class', 'empty').attr('id', 'redempty').text('No blocked requests yet.');
       $('done').hidden = true;
-      for (const c of cats) rows[c].upUntil = 0;
+      for (const c of cats) { rows[c].upUntil = 0; rows[c].downUntil = 0; }
       resetLive(); renderKpis();
       drawLanes(0); updateCounter();
     }
