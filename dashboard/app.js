@@ -139,7 +139,7 @@
       kpi('Allowed', esc(m.allowed), 'g') + kpi('Errors', esc(m.errors), 'a') +
       kpi('Avg latency (ms)', fmtNum(m.avg_latency_ms, 0)) +
       kpi('Total cost', '&asymp; &#8377;' + fmtNum(m.total_cost * USD_TO_INR, 2) + '<div class="l">$' + fmtNum(m.total_cost, 4) + ' USD</div>') + '</div>' +
-      (Object.keys(byCat).length ? '<p class="bycat">' + Object.entries(byCat).filter(([, v]) => v.total)
+      (Object.keys(byCat).length ? '<p class="bycat">Caught, by true attack type: ' + Object.entries(byCat).filter(([, v]) => v.total)
         .map(([c, v]) => `${esc(nice(c))} <b>${esc(v.blocked)}/${esc(v.total)}</b>`).join(' &middot; ') + '</p>' : '');
 
     const stream = d3.select('#stream'), redlog = d3.select('#redlog');
@@ -152,7 +152,7 @@
         redlog.select('#redempty').remove();
         const conf = typeof e.jev_confidence === 'number' ? (e.jev_confidence * 100).toFixed(0) + '%' : 'n/a';
         redlog.insert('div', ':first-child').attr('class', 'flag')
-          .html(`<span class="c">${esc(nice(laneOf(e)))} &middot; ${conf}</span><b>BLOCK</b> <span class="p">${esc(e.method)} ${esc(e.path)}</span><span class="r">${esc(e.reason)}</span>`);
+          .html(`<span class="c">${e.true_label === 'benign' ? 'false alarm &middot; ' : ''}${esc(nice(laneOf(e)))} &middot; ${conf}</span><b>BLOCK</b> <span class="p">${esc(e.method)} ${esc(e.path)}</span><span class="r">${esc(e.reason)}</span>`);
         redlog.selectAll('.flag').filter((d, i) => i >= MAXROWS).remove();
       }
     }
@@ -293,7 +293,7 @@
       for (let yy = wallTop + 18; yy < groundY; yy += 18) { ctx.beginPath(); ctx.moveTo(castleX, yy); ctx.lineTo(castleX + castleW, yy); ctx.stroke(); }
       // the wall doubles as the scoreboard
       ctx.fillStyle = 'rgba(232,189,106,.85)'; ctx.font = '600 10.5px system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText('BLOCKED · RANKED BY ATTACK TYPE', castleX + 32, wallTop + 13);
+      ctx.fillText('ATTACKS BLOCKED · RANKED BY JEV’S CATEGORY', castleX + 32, wallTop + 13);
       ctx.fillStyle = '#0d1120';
       ctx.beginPath();
       ctx.moveTo(gateCX - gateW / 2, groundY);
@@ -393,7 +393,7 @@
     }
 
     function play() {
-      if (spawned >= total && !arrows.length) restart();
+      if (!$('done').hidden) restart(); // replay only after the finish card; a pause mid-fade just resumes
       if (!total) return;
       playing = true; $('play').textContent = 'Pause'; last = performance.now();
     }

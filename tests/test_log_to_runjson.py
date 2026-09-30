@@ -70,7 +70,7 @@ def test_single_category_timeline_one_series():
 def test_timeline_cumulative_excludes_none_and_unblocked(log):
     tl = build_runjson(log)["category_timeline"]
     assert len(tl) == len(log)
-    assert tl[-1]["counts"] == {"sql_injection": 2, "xss": 1}  # FP xss block counts
+    assert tl[-1]["counts"] == {"sql_injection": 2}  # the FP xss block is not an attack blocked
     assert all("none" not in f["counts"] for f in tl)
 
 
@@ -142,7 +142,7 @@ def test_build_waves_concatenates_and_tags():
     assert [(w["label"], w["start"], w["count"]) for w in out["waves"]] == [("Wave 1", 0, 2), ("Wave 2", 2, 2)]
     assert out["waves"][0]["metrics"]["FP"] == 0 and out["waves"][1]["metrics"]["FP"] == 1
     assert (out["metrics"]["TP"], out["metrics"]["FP"]) == (3, 1)
-    assert out["category_timeline"][-1]["counts"] == {"sql_injection": 2, "abuse": 1, "prompt_injection": 1}
+    assert out["category_timeline"][-1]["counts"] == {"sql_injection": 2, "prompt_injection": 1}  # FP excluded
     assert [f["step"] for f in out["category_timeline"]] == [0, 1, 2, 3]
     assert out["by_category"]["prompt_injection"] == {"total": 1, "blocked": 1}
 
@@ -168,3 +168,13 @@ def test_cli_legacy_positional(tmp_path):
     assert main([str(l1), str(o), "note"]) == 0
     d = json.loads(o.read_text())
     assert len(d["waves"]) == 1 and d["note"] == "note"
+
+
+def test_gap_ms_mixed_timezone_falls_back():
+    rows = _ts([row("allow", "benign", "none", 0.1, "none")] * 2, ["2026-09-29T10:00:00Z", "2026-09-29T10:00:01"])
+    assert build_runjson(rows)["events"][1]["gap_ms"] == 390
+
+
+def test_unlabelled_log_counts_every_block():
+    r = dict(row("block", None, "xss", 0.9, None))
+    assert build_runjson([r])["category_timeline"][-1]["counts"] == {"xss": 1}

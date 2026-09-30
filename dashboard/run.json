@@ -23559,7 +23559,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 2,
-        "abuse": 2
+        "abuse": 1
       }
     },
     {
@@ -23575,7 +23575,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 2,
-        "abuse": 3
+        "abuse": 2
       }
     },
     {
@@ -23591,7 +23591,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 2,
-        "abuse": 4
+        "abuse": 3
       }
     },
     {
@@ -23607,7 +23607,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 2,
-        "abuse": 4
+        "abuse": 3
       }
     },
     {
@@ -23623,7 +23623,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 2,
-        "abuse": 4
+        "abuse": 3
       }
     },
     {
@@ -23639,7 +23639,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 2,
-        "abuse": 4
+        "abuse": 3
       }
     },
     {
@@ -23655,7 +23655,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 2,
-        "abuse": 4
+        "abuse": 3
       }
     },
     {
@@ -23671,7 +23671,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 2,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 1
       }
     },
@@ -23688,7 +23688,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 2,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 1
       }
     },
@@ -23705,7 +23705,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 1
       }
     },
@@ -23722,7 +23722,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 1
       }
     },
@@ -23739,7 +23739,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 1
       }
     },
@@ -23756,7 +23756,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 1
       }
     },
@@ -23773,7 +23773,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23790,7 +23790,7 @@
         "ssrf": 6,
         "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23805,9 +23805,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23822,9 +23822,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23839,9 +23839,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23856,9 +23856,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23873,9 +23873,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23890,9 +23890,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23907,9 +23907,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23924,9 +23924,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23941,9 +23941,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23958,9 +23958,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 4,
+        "abuse": 3,
         "prompt_injection": 2
       }
     },
@@ -23975,9 +23975,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 5,
+        "abuse": 4,
         "prompt_injection": 2
       }
     },
@@ -23992,9 +23992,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 5,
+        "abuse": 4,
         "prompt_injection": 2
       }
     },
@@ -24009,9 +24009,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 5,
+        "abuse": 4,
         "prompt_injection": 2
       }
     },
@@ -24026,9 +24026,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 5,
+        "abuse": 4,
         "prompt_injection": 2
       }
     },
@@ -24043,9 +24043,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 5,
+        "abuse": 4,
         "prompt_injection": 2
       }
     },
@@ -24060,9 +24060,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 5,
+        "abuse": 4,
         "prompt_injection": 2
       }
     },
@@ -24077,9 +24077,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 5,
+        "abuse": 4,
         "prompt_injection": 3
       }
     },
@@ -24094,9 +24094,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 5,
+        "abuse": 4,
         "prompt_injection": 3
       }
     },
@@ -24111,9 +24111,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 5,
+        "abuse": 4,
         "prompt_injection": 3
       }
     },
@@ -24128,9 +24128,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 3,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 3
       }
     },
@@ -24145,9 +24145,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 4,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 3
       }
     },
@@ -24162,9 +24162,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 4,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 3
       }
     },
@@ -24179,9 +24179,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 4,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 4
       }
     },
@@ -24196,9 +24196,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 4,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 4
       }
     },
@@ -24213,9 +24213,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 4,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 4
       }
     },
@@ -24230,9 +24230,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 4,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 4
       }
     },
@@ -24247,9 +24247,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 4
       }
     },
@@ -24264,9 +24264,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 4
       }
     },
@@ -24281,9 +24281,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 4
       }
     },
@@ -24298,9 +24298,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 5
       }
     },
@@ -24315,9 +24315,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24332,9 +24332,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24349,9 +24349,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24366,9 +24366,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24383,9 +24383,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24400,9 +24400,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24417,9 +24417,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24434,9 +24434,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 6,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24451,9 +24451,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 5,
-        "abuse": 7,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24468,9 +24468,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 6,
-        "abuse": 7,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24485,9 +24485,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 6,
-        "abuse": 7,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24502,9 +24502,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 6,
-        "abuse": 7,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24519,9 +24519,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 6,
-        "abuse": 7,
+        "abuse": 5,
         "prompt_injection": 6
       }
     },
@@ -24536,9 +24536,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 6,
-        "abuse": 8,
+        "abuse": 6,
         "prompt_injection": 6
       }
     },
@@ -24553,9 +24553,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 8,
+        "abuse": 6,
         "prompt_injection": 6
       }
     },
@@ -24570,9 +24570,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 8,
+        "abuse": 6,
         "prompt_injection": 6
       }
     },
@@ -24587,9 +24587,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 9,
+        "abuse": 7,
         "prompt_injection": 6
       }
     },
@@ -24604,9 +24604,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 9,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24621,9 +24621,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 9,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24638,9 +24638,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 9,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24655,9 +24655,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 9,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24672,9 +24672,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 10,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24689,9 +24689,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 10,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24706,9 +24706,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 10,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24723,9 +24723,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 10,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24740,9 +24740,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 10,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24757,9 +24757,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 7,
-        "abuse": 10,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24774,9 +24774,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 8,
-        "abuse": 10,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24791,9 +24791,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 8,
-        "abuse": 10,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24808,9 +24808,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 8,
-        "abuse": 10,
+        "abuse": 7,
         "prompt_injection": 7
       }
     },
@@ -24825,9 +24825,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 8,
-        "abuse": 11,
+        "abuse": 8,
         "prompt_injection": 7
       }
     },
@@ -24842,9 +24842,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 8,
-        "abuse": 11,
+        "abuse": 8,
         "prompt_injection": 8
       }
     },
@@ -24859,9 +24859,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 8,
-        "abuse": 11,
+        "abuse": 8,
         "prompt_injection": 8
       }
     },
@@ -24876,9 +24876,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 8,
-        "abuse": 11,
+        "abuse": 8,
         "prompt_injection": 8
       }
     },
@@ -24893,9 +24893,9 @@
         "xss": 14,
         "other_exploit": 3,
         "ssrf": 6,
-        "unlabelled_attack": 3,
+        "unlabelled_attack": 2,
         "data_exfiltration": 8,
-        "abuse": 11,
+        "abuse": 8,
         "prompt_injection": 8
       }
     }

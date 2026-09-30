@@ -71,7 +71,10 @@ def _timeline(rows):
     counts, frames = {}, []
     for i, r in enumerate(rows):
         cat = r.get("jev_category")
-        if r.get("action") == "block":
+        # Real attacks only: a false alarm (a legitimate request Jev blocked) is not an "attack
+        # category blocked"; it is reported by the false-alarm metric instead. Unlabelled logs
+        # (no true_label, e.g. a live demo) count every block.
+        if r.get("action") == "block" and r.get("true_label") != "benign":
             cat = cat if cat in ATTACK_CATEGORIES else UNLABELLED
             counts[cat] = counts.get(cat, 0) + 1
         frames.append({"step": i, "counts": dict(counts)})
@@ -105,8 +108,12 @@ def _gaps(rows):
         elif t is None or prev is None:
             gaps.append(GAP_FALLBACK_MS)
         else:
-            ms = (t - prev).total_seconds() * 1000
-            gaps.append(int(round(min(GAP_MAX_MS, max(GAP_MIN_MS, ms)))))
+            try:
+                ms = (t - prev).total_seconds() * 1000
+            except TypeError:  # one timestamp has a timezone, the other doesn't
+                gaps.append(GAP_FALLBACK_MS)
+            else:
+                gaps.append(int(round(min(GAP_MAX_MS, max(GAP_MIN_MS, ms)))))
         prev = t
     return gaps
 
