@@ -1,6 +1,8 @@
 import pytest
 
-from tools.log_to_runjson import build_runjson, load_log
+import json
+
+from tools.log_to_runjson import build_runjson, build_waves, load_log, main
 
 
 def row(action, true_label, jev_category=None, is_attack=None, true_category=None,
@@ -94,3 +96,75 @@ def test_load_log_skips_blank_and_malformed(tmp_path):
     p = tmp_path / "l.jsonl"
     p.write_text('{"a": 1}\n\nnot json\n[1]\n{"b": 2}\n')
     assert load_log(str(p)) == [{"a": 1}, {"b": 2}]
+
+
+# ---- day-2: multi-wave replay with real pacing ----
+
+def _ts(rows, stamps):
+    return [dict(r, ts=t) for r, t in zip(rows, stamps)]
+
+
+def test_gap_ms_from_timestamps_clamped():
+    rows = _ts([row("allow", "benign", "none", 0.1, "none")] * 4,
+               ["2026-09-29T10:00:00.000+00:00", "2026-09-29T10:00:00.400+00:00",
+                "2026-09-29T10:00:30.000+00:00", "2026-09-29T09:00:00.000+00:00"])
+    ev = build_runjson(rows)["events"]
+    assert [e["gap_ms"] for e in ev] == [0, 400, 3000, 40]
+
+
+def test_gap_ms_unparseable_ts_falls_back():
+    rows = _ts([row("allow", "benign", "none", 0.1, "none")] * 2, ["2026-09-29T10:00:00Z", "garbage"])
+    assert build_runjson(rows)["events"][1]["gap_ms"] == 390
+
+
+def test_events_carry_latency_and_wave():
+    ev = build_runjson([row("allow", "benign", "none", 0.1, "none", latency=321.5)])["events"][0]
+    assert ev["latency_ms"] == 321.5 and ev["wave"] == 0
+
+
+def test_blocked_none_goes_to_unlabelled_lane():
+    tl = build_runjson([row("block", "malicious", "none", 0.9, "xss")])["category_timeline"]
+    assert tl[-1]["counts"] == {"unlabelled_attack": 1}
+
+
+def test_single_log_has_one_wave():
+    out = build_runjson([row("allow", "benign", "none", 0.1, "none")])
+    assert [(w["start"], w["count"]) for w in out["waves"]] == [(0, 1)]
+
+
+def test_build_waves_concatenates_and_tags():
+    a = [row("block", "malicious", "sql_injection", 0.9, "sql_injection")] * 2
+    b = [row("block", "benign", "abuse", 0.5, "none"),
+         row("block", "malicious", "prompt_injection", 0.9, "prompt_injection")]
+    out = build_waves([("Wave 1", a), ("Wave 2", b)])
+    assert [e["wave"] for e in out["events"]] == [0, 0, 1, 1]
+    assert out["events"][2]["gap_ms"] == 0  # a new wave starts fresh
+    assert [(w["label"], w["start"], w["count"]) for w in out["waves"]] == [("Wave 1", 0, 2), ("Wave 2", 2, 2)]
+    assert out["waves"][0]["metrics"]["FP"] == 0 and out["waves"][1]["metrics"]["FP"] == 1
+    assert (out["metrics"]["TP"], out["metrics"]["FP"]) == (3, 1)
+    assert out["category_timeline"][-1]["counts"] == {"sql_injection": 2, "abuse": 1, "prompt_injection": 1}
+    assert [f["step"] for f in out["category_timeline"]] == [0, 1, 2, 3]
+    assert out["by_category"]["prompt_injection"] == {"total": 1, "blocked": 1}
+
+
+def test_build_waves_empty():
+    out = build_waves([])
+    assert out["events"] == [] and out["waves"] == [] and out["metrics"]["total_requests"] == 0
+
+
+def test_cli_waves(tmp_path):
+    l1, l2, o = tmp_path / "a.jsonl", tmp_path / "b.jsonl", tmp_path / "out.json"
+    l1.write_text(json.dumps(row("allow", "benign", "none", 0.1, "none")) + "\n")
+    l2.write_text(json.dumps(row("block", "malicious", "abuse", 0.9, "abuse")) + "\n")
+    assert main([str(o), "--wave", "A", str(l1), "--wave", "B", str(l2), "--note", "n"]) == 0
+    d = json.loads(o.read_text())
+    assert [w["label"] for w in d["waves"]] == ["A", "B"] and d["note"] == "n"
+    assert len(d["events"]) == 2
+
+
+def test_cli_legacy_positional(tmp_path):
+    l1, o = tmp_path / "a.jsonl", tmp_path / "out.json"
+    l1.write_text(json.dumps(row("allow", "benign", "none", 0.1, "none")) + "\n")
+    assert main([str(l1), str(o), "note"]) == 0
+    d = json.loads(o.read_text())
+    assert len(d["waves"]) == 1 and d["note"] == "note"

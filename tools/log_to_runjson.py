@@ -1,6 +1,7 @@
 """Aggregate the proxy's JSONL decision log into a run.json for the dashboard."""
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -9,7 +10,9 @@ from jev_client import CATEGORIES  # noqa: E402
 
 ATTACK_CATEGORIES = [c for c in CATEGORIES if c != "none"]
 EVENT_FIELDS = ("ts", "method", "path", "action", "jev_category", "jev_confidence",
-                "is_attack", "reason", "true_label", "true_category")
+                "is_attack", "reason", "true_label", "true_category", "latency_ms")
+UNLABELLED = "unlabelled_attack"  # blocked, but Jev's category was 'none' or unknown
+GAP_MIN_MS, GAP_MAX_MS, GAP_FALLBACK_MS = 40, 3000, 390
 
 
 def load_log(path):
@@ -68,7 +71,8 @@ def _timeline(rows):
     counts, frames = {}, []
     for i, r in enumerate(rows):
         cat = r.get("jev_category")
-        if r.get("action") == "block" and cat in ATTACK_CATEGORIES:
+        if r.get("action") == "block":
+            cat = cat if cat in ATTACK_CATEGORIES else UNLABELLED
             counts[cat] = counts.get(cat, 0) + 1
         frames.append({"step": i, "counts": dict(counts)})
     return frames
@@ -84,24 +88,94 @@ def _by_category(rows):
     return out
 
 
-def build_runjson(log_lines):
+def _parse_ts(ts):
+    try:
+        return datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+
+
+def _gaps(rows):
+    """Real pacing: ms since the previous request in the same log (first = 0), clamped."""
+    gaps, prev = [], None
+    for i, r in enumerate(rows):
+        t = _parse_ts(r.get("ts"))
+        if i == 0:
+            gaps.append(0)
+        elif t is None or prev is None:
+            gaps.append(GAP_FALLBACK_MS)
+        else:
+            ms = (t - prev).total_seconds() * 1000
+            gaps.append(int(round(min(GAP_MAX_MS, max(GAP_MIN_MS, ms)))))
+        prev = t
+    return gaps
+
+
+def build_waves(waves):
+    """Replay several logs back to back. waves = [(label, rows), ...].
+
+    Each event gets its wave index and real gap_ms; each wave keeps its own metrics so the
+    dashboard can say where false alarms came from. Totals are over all waves.
+    """
+    events, all_rows, meta = [], [], []
+    for wi, (label, rows) in enumerate(waves):
+        meta.append({"label": label, "start": len(events), "count": len(rows), "metrics": _metrics(rows)})
+        for r, gap in zip(rows, _gaps(rows)):
+            e = {k: r.get(k) for k in EVENT_FIELDS}
+            e["wave"], e["gap_ms"] = wi, gap
+            events.append(e)
+        all_rows.extend(rows)
     return {
-        "events": [{k: r.get(k) for k in EVENT_FIELDS} for r in log_lines],
-        "category_timeline": _timeline(log_lines),
-        "metrics": _metrics(log_lines),
-        "by_category": _by_category(log_lines),
+        "events": events,
+        "category_timeline": _timeline(all_rows),
+        "metrics": _metrics(all_rows),
+        "by_category": _by_category(all_rows),
+        "waves": meta,
     }
+
+
+def build_runjson(log_lines):
+    return build_waves([("Run", log_lines)] if log_lines else [])
+
+
+USAGE = ("usage: python tools/log_to_runjson.py <log.jsonl> <out.json> [note]\n"
+         "   or: python tools/log_to_runjson.py <out.json> --wave LABEL LOG [--wave LABEL LOG ...] [--note TEXT]")
+
+
+def _parse_wave_args(argv):
+    out_path, waves, note, i = argv[0], [], None, 1
+    while i < len(argv):
+        if argv[i] == "--wave" and i + 2 < len(argv):
+            waves.append((argv[i + 1], argv[i + 2]))
+            i += 3
+        elif argv[i] == "--note" and i + 1 < len(argv):
+            note = argv[i + 1]
+            i += 2
+        else:
+            raise ValueError(argv[i])
+    if not waves:
+        raise ValueError("no --wave given")
+    return out_path, waves, note
 
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    if len(argv) not in (2, 3):
-        print("usage: python tools/log_to_runjson.py <log.jsonl> <out.json> [note]", file=sys.stderr)
+    if "--wave" in argv:
+        try:
+            out_path, waves, note = _parse_wave_args(argv)
+        except ValueError:
+            print(USAGE, file=sys.stderr)
+            return 2
+        out = build_waves([(label, load_log(p)) for label, p in waves])
+    elif len(argv) in (2, 3):
+        out_path, note = argv[1], (argv[2] if len(argv) == 3 else None)
+        out = build_runjson(load_log(argv[0]))
+    else:
+        print(USAGE, file=sys.stderr)
         return 2
-    out = build_runjson(load_log(argv[0]))
-    if len(argv) == 3:
-        out["note"] = argv[2]  # shown on the dashboard, e.g. which threshold was applied
-    Path(argv[1]).write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+    if note:
+        out["note"] = note  # shown on the dashboard, e.g. which threshold was applied
+    Path(out_path).write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
     return 0
 
 
