@@ -104,7 +104,18 @@ Convert the log into the file the dashboard reads:
 python tools/log_to_runjson.py logs/run-<timestamp>.jsonl dashboard/run.json
 ```
 
-(replace `<timestamp>` with the real file name in `logs/`). The repo ships with a mock `dashboard/run.json`, so the dashboard works before any real run. `logs/sample-run.jsonl` is a small sample of the log format; you can regenerate a mock log with `python tools/make_mock_log.py logs/mock.jsonl`.
+(replace `<timestamp>` with the real file name in `logs/`).
+
+To replay several runs back to back as "waves" (this is how the published dashboard is built: the classic run, then the semantic run), pass each log with a label:
+
+```
+python tools/log_to_runjson.py dashboard/run.json \
+  --wave "Wave 1 · classic web attacks" logs/run-20260929T164714Z.jsonl \
+  --wave "Wave 2 · AI-era semantic attacks" logs/run-20260929T195753Z.jsonl \
+  --note "Text shown above the accuracy numbers"
+```
+
+Each event keeps its real pacing (`gap_ms`, from the log timestamps), so speed **1x replays at the real classification speed**. The castle wall is the bar-chart race: every blocked request hits its category's lane, and lanes re-rank live. The three cards on top (attacks caught, false alarms, average decision latency) update as the replay runs; the false-alarm card says which wave they came from. The repo ships with a mock `dashboard/run.json`, so the dashboard works before any real run. `logs/sample-run.jsonl` is a small sample of the log format; you can regenerate a mock log with `python tools/make_mock_log.py logs/mock.jsonl`.
 
 ## View the dashboard
 

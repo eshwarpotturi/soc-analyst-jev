@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jev's Keep</title>
-<meta name="description" content="Replay of a real Jev run: each HTTP request is an arrow at the castle. Blocked attacks splinter on the wall, allowed requests enter as villagers. Full analytics below.">
+<meta name="description" content="Replay of two real Jev runs: each HTTP request is an arrow at the castle. Blocked attacks hit the wall, which doubles as a live ranking of attack types; allowed requests pass through the gate.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap">
@@ -12,6 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 </head>
 <body>
+<div class="stage">
 <header>
   <h1>Jev&rsquo;s Keep <span>SOC analyst replay</span></h1>
   <div class="controls">
@@ -19,27 +20,53 @@
     <button id="restart" type="button">Restart</button>
     <label for="speed">Speed
       <select id="speed">
-        <option value="1">1x</option>
-        <option value="2" selected>2x</option>
-        <option value="4">4x</option>
-        <option value="8">8x</option>
+        <option value="1" selected>1x &middot; real time</option>
+        <option value="2">2x</option>
+        <option value="5">5x</option>
+        <option value="10">10x</option>
+        <option value="25">25x</option>
       </select>
     </label>
   </div>
+  <div class="wave-pill" id="wave-pill"></div>
   <div class="counter" id="counter">0 / 0 judged &middot; 0 blocked</div>
 </header>
 <div class="progress"><div id="bar"></div></div>
 
+<section id="kpis" class="kpirow" aria-label="Key metrics, updating as the replay runs">
+  <div class="kcard">
+    <div class="kl">Attacks caught</div>
+    <div class="kv g"><span id="k-caught">0</span><span class="of"> / <span id="k-att">0</span></span></div>
+    <div class="ks" id="k-caught-s">of the attacks judged so far</div>
+  </div>
+  <div class="kcard">
+    <div class="kl">False alarms</div>
+    <div class="kv g" id="k-fa">0</div>
+    <div class="ks" id="k-fa-s">legitimate requests blocked</div>
+  </div>
+  <div class="kcard">
+    <div class="kl">Avg decision latency</div>
+    <div class="kv x"><span id="k-lat">&mdash;</span><span class="of"> ms</span></div>
+    <div class="ks">per request &middot; real Jev round-trip</div>
+  </div>
+</section>
+
 <section id="siege" aria-label="Castle siege animation">
   <canvas id="castle"></canvas>
+  <div id="lanes" role="list" aria-label="Attacks blocked, ranked by type"></div>
   <div class="chips">
     <div class="chip"><b id="s-seen">0</b><span>Incoming</span></div>
     <div class="chip good"><b id="s-in">0</b><span>Admitted</span></div>
     <div class="chip bad"><b id="s-block">0</b><span>Repelled</span></div>
   </div>
+  <div id="wave-banner" hidden aria-live="polite">
+    <div class="wb-k" id="wb-k"></div>
+    <div class="wb-t" id="wb-t"></div>
+    <div class="wb-s" id="wb-s"></div>
+  </div>
   <div class="legend">
     <div><i class="dot good"></i>Legitimate request &middot; <i class="dot bad"></i>Attack <span class="lg-dim">(the shape = what it really is)</span></div>
-    <div>Through the gate = Jev allowed &middot; stopped at the wall = Jev blocked</div>
+    <div>Through the gate = Jev allowed &middot; hits the wall = Jev blocked, ranked by attack type</div>
   </div>
   <div id="done" hidden>
     <div class="card">
@@ -48,12 +75,12 @@
       <p><a href="#analytics">See the full analytics</a></p>
     </div>
   </div>
-  <a class="jump" href="#analytics">Skip to the numbers &darr;</a>
+  <a class="jump" href="#analytics">Details &darr;</a>
 </section>
+</div>
 
 <main id="analytics">
-  <section class="panel" id="p-acc"><h2>Accuracy <small>whole run</small></h2><div id="accuracy"></div></section>
-  <section class="panel" id="p-race"><h2>Attack categories blocked <small>bar chart race</small></h2><div id="race"></div></section>
+  <section class="panel" id="p-acc"><h2>Accuracy <small>both waves</small></h2><div id="accuracy"></div></section>
   <section class="panel" id="p-stream"><h2>Request stream</h2><div id="stream" class="scroll"></div></section>
   <section class="panel" id="p-log"><h2>Red-flag log <small>blocked requests, newest first</small></h2><div id="redlog" class="scroll"></div></section>
 </main>
@@ -61,7 +88,7 @@
 <section id="semantic">
   <div class="sem-inner">
     <h2 class="sem-h">Beyond classic attacks: what a signature WAF can&rsquo;t see</h2>
-    <p class="sem-lede">The run above is <b>classic</b> attacks &mdash; SQL injection, XSS, path traversal &mdash; things with a recognisable <b>payload shape</b>. A rule-based WAF catches most of those. But a newer class of attack carries <b>no signature</b>: prompt injection against an app&rsquo;s AI, requests that ask it to leak data, and business-logic abuse. They read as ordinary English, so pattern rules never fire. Below, a signature WAF and Jev see the <b>same</b> set of these semantic attacks.</p>
+    <p class="sem-lede">Wave 1 is <b>classic</b> attacks &mdash; SQL injection, XSS, path traversal &mdash; things with a recognisable <b>payload shape</b>. A rule-based WAF catches most of those. Wave 2 is a newer class that carries <b>no signature</b>: prompt injection against an app&rsquo;s AI, requests that ask it to leak data, and business-logic abuse. They read as ordinary English, so pattern rules never fire. Below, a signature WAF and Jev see the <b>same</b> set of these semantic attacks.</p>
     <div class="cols" id="sem-cols"></div>
     <h3 class="sem-sub">What each let through</h3>
     <div class="scroll"><table id="sem-ex"><thead><tr><th>Semantic attack (the actual request)</th><th>Type</th><th>Regex WAF</th><th>Jev</th></tr></thead><tbody></tbody></table></div>
